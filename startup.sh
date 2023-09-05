@@ -1,1 +1,2 @@
-gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
+if __name__ == "__main__":
+    uvicorn.run("main:app", port=8000, reload=True)
