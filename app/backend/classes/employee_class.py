@@ -208,33 +208,33 @@ class EmployeeClass:
     def update(self, id, employee_inputs):
         employee =  self.db.query(EmployeeModel).filter(EmployeeModel.rut == id).one_or_none()
 
-        if employee_inputs['rut'] != None:
+        if 'rut' in employee_inputs and employee_inputs['rut'] is not None:
             numeric_rut = HelperClass().numeric_rut(str(employee_inputs['rut']))
             employee.rut = numeric_rut
             employee.visual_rut = employee_inputs['rut']
         
-        if employee_inputs['names'] != None:
+        if 'names' in employee_inputs and employee_inputs['names'] is not None:
             employee.names = employee_inputs['names']
         
-        if employee_inputs['father_lastname'] != None:
+        if 'father_lastname' in employee_inputs and employee_inputs['father_lastname'] is not None:
             employee.father_lastname = employee_inputs['father_lastname']
         
-        if employee_inputs['mother_lastname'] != None:
+        if 'mother_lastname' in employee_inputs and employee_inputs['mother_lastname'] is not None:
             employee.mother_lastname = employee_inputs['mother_lastname']
 
-        if employee_inputs['gender_id'] != None:
+        if 'gender_id' in employee_inputs and employee_inputs['gender_id'] is not None:
             employee.gender_id = employee_inputs['gender_id']
 
-        if employee_inputs['nationality_id'] != None:
+        if 'nationality_id' in employee_inputs and employee_inputs['nationality_id'] is not None:
             employee.nationality_id = employee_inputs['nationality_id']
         
-        if employee_inputs['personal_email'] != None:
+        if 'personal_email' in employee_inputs and employee_inputs['personal_email'] is not None:
             employee.personal_email = employee_inputs['personal_email']
         
-        if employee_inputs['cellphone'] != None:
+        if 'cellphone' in employee_inputs and employee_inputs['cellphone'] is not None:
             employee.cellphone = employee_inputs['cellphone']
         
-        if employee_inputs['born_date'] != None:
+        if 'born_date' in employee_inputs and employee_inputs['born_date'] is not None:
             employee.born_date = employee_inputs['born_date']
 
         employee.update_date = datetime.now()

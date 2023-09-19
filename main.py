@@ -46,6 +46,10 @@ from app.backend.routers.kardex_data import kardex_data
 from app.backend.routers.honorary_reasons import honorary_reasons
 from fastapi.middleware.cors import CORSMiddleware
 from app.backend.routers.progressive_vacations import progressive_vacations
+from app.backend.routers.employee_types import employee_types
+from app.backend.routers.regimes import regimes
+from app.backend.routers.salary_settlements import salary_settlements
+from app.backend.routers.document_managements import document_managements
 
 app = FastAPI()
 
@@ -53,13 +57,7 @@ os.environ['SECRET_KEY'] = '7de4c36b48fce8dcb3a4bb527ba62d789ebf3d3a7582472ee49d
 os.environ['ALGORITHM'] = 'HS256'
 
 # Configura las opciones de CORS
-origins = [
-    "http://localhost:5173",  # Reemplaza esto con el dominio donde se ejecuta tu aplicación Vue.js
-    "http://127.0.0.1:5173",
-    "http://localhost",         # Agrega aquí la URL del frontend, por ejemplo, "http://localhost:5173"
-    "http://127.0.0.1",
-    "http://127.0.0.1:8000",
-]
+origins = ["*"]
 
 # Agrega el middleware de CORS a la aplicación
 app.add_middleware(
@@ -114,3 +112,7 @@ app.include_router(mesh_data)
 app.include_router(kardex_data)
 app.include_router(honorary_reasons)
 app.include_router(progressive_vacations)
+app.include_router(employee_types)
+app.include_router(regimes)
+app.include_router(salary_settlements)
+app.include_router(document_managements)

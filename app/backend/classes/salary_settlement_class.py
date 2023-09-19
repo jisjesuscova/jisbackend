@@ -4,7 +4,7 @@ from sqlalchemy import desc
 from app.backend.classes.dropbox_class import DropboxClass
 from app.backend.classes.helper_class import HelperClass
 
-class MedicalLicenseClass:
+class SalarySettlementClass:
     def __init__(self, db):
         self.db = db
 
@@ -21,16 +21,15 @@ class MedicalLicenseClass:
     def get(self, field, value, type = 1, page = 1, items_per_page = 10):
         try:
             if type == 1:
-                data = self.db.query(MedicalLicenseModel).filter(getattr(MedicalLicenseModel, field) == value).first()
+                data = self.db.query(DocumentEmployeeModel).filter(getattr(DocumentEmployeeModel, field) == value).filter(DocumentEmployeeModel.document_type_id == 5).first()
 
                 return data
             else:
-                data_query = self.db.query(MedicalLicenseModel.document_employee_id, DocumentEmployeeModel.document_type_id, MedicalLicenseModel.folio, EmployeeModel.visual_rut, MedicalLicenseModel.since, MedicalLicenseModel.until, MedicalLicenseModel.days, DocumentEmployeeModel.support, DocumentEmployeeModel.status_id, MedicalLicenseModel.id).\
-                    outerjoin(DocumentEmployeeModel, DocumentEmployeeModel.id == MedicalLicenseModel.document_employee_id).\
-                    outerjoin(EmployeeModel, EmployeeModel.rut == MedicalLicenseModel.rut).\
-                    filter(getattr(MedicalLicenseModel, field) == value).\
-                    filter(DocumentEmployeeModel.document_type_id == 35).\
-                    order_by(desc(MedicalLicenseModel.since))
+                data_query = self.db.query(DocumentEmployeeModel.added_date, DocumentEmployeeModel.document_type_id, DocumentEmployeeModel.support, DocumentEmployeeModel.status_id, DocumentEmployeeModel.id).\
+                    outerjoin(EmployeeModel, EmployeeModel.rut == DocumentEmployeeModel.rut).\
+                    filter(getattr(DocumentEmployeeModel, field) == value).\
+                    filter(DocumentEmployeeModel.document_type_id == 5).\
+                    order_by(desc(DocumentEmployeeModel.id))
 
                 total_items = data_query.count()
                 total_pages = (total_items + items_per_page - 1) // items_per_page
@@ -114,7 +113,7 @@ class MedicalLicenseClass:
         try:
             data = self.db.query(DocumentEmployeeModel).filter(DocumentEmployeeModel.id == id).first()
 
-            file = DropboxClass(self.db).get('/medical_licenses/', data.support)
+            file = DropboxClass(self.db).get('/salary_settlements/', data.support)
 
             return file
         except Exception as e:

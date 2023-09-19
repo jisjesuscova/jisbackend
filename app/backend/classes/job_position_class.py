@@ -6,7 +6,7 @@ class JobPositionClass:
 
     def get_all(self):
         try:
-            data = self.db.query(JobPositionModel).order_by(JobPositionModel.id).all()
+            data = self.db.query(JobPositionModel).order_by(JobPositionModel.job_position).all()
             if not data:
                 return "No data found"
             return data

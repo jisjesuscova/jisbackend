@@ -65,27 +65,31 @@ class UserClass:
     def update(self, id, user_inputs):
         user = self.db.query(UserModel).filter(UserModel.rut == id).one_or_none()
 
-        if user_inputs['rut'] != None:
+        if 'rut' in user_inputs and user_inputs['rut'] is not None:
             numeric_rut = HelperClass().numeric_rut(user_inputs['rut'])
             user.rut = numeric_rut
 
-        user.rol_id = 1
-        if user_inputs['clock_rol_id'] != None:
+        if 'rol_id' in user_inputs and user_inputs['rol_id'] is not None:
+            user.rol_id = user_inputs['rol_id']
+
+        if 'clock_rol_id' in user_inputs and user_inputs['clock_rol_id'] is not None:
             user.clock_rol_id = user_inputs['clock_rol_id']
         
-        user.status_id = 1
+        if 'status_id' in user_inputs and user_inputs['status_id'] is not None:
+            user.status_id = user_inputs['status_id']
 
-        if user_inputs['rut'] != None:
+        if 'rut' in user_inputs and user_inputs['rut'] is not None:
             user.visual_rut = user_inputs['rut']
 
-        if user_inputs['names'] != None and user_inputs['father_lastname'] != None:
+        if 'names' in user_inputs and user_inputs['names'] is not None and 'father_lastname' in user_inputs and user_inputs['father_lastname'] is not None:
             nickname = HelperClass().nickname(user_inputs['names'], user_inputs['father_lastname'])
             user.nickname = nickname
-        
-        if user_inputs['password'] != None:
+
+        if 'password' in user_inputs and user_inputs['password'] is not None:
             user.hashed_password = generate_bcrypt_hash(user_inputs['password'])
         
-        user.disabled = 0
+        if 'disabled' in user_inputs and user_inputs['disabled'] is not None:
+            user.disabled = user_inputs['disabled']
 
         user.updated_date = datetime.now()
 

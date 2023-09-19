@@ -19,7 +19,7 @@ def index(db: Session = Depends(get_db)):
 
 @documents_employees.post("/store")
 def store(document_employee:DocumentEmployee, db: Session = Depends(get_db)):
-    document_employee_inputs = document_employee
+    document_employee_inputs = document_employee.dict()
     data = DocumentEmployeeClass(db).store(document_employee_inputs)
 
     return {"message": data}

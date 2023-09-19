@@ -15,7 +15,7 @@ class VacationClass:
 
     def get_all(self, rut, page = 1, items_per_page = 10):
         try:
-            data_query = self.db.query(DocumentEmployeeModel.document_type_id, VacationModel.document_employee_id, DocumentEmployeeModel.support, VacationModel.rut, VacationModel.id, VacationModel.since, VacationModel.until, VacationModel.days, VacationModel.no_valid_days).\
+            data_query = self.db.query(DocumentEmployeeModel.status_id, DocumentEmployeeModel.document_type_id, VacationModel.document_employee_id, DocumentEmployeeModel.support, VacationModel.rut, VacationModel.id, VacationModel.since, VacationModel.until, VacationModel.days, VacationModel.no_valid_days).\
                     outerjoin(DocumentEmployeeModel, DocumentEmployeeModel.id == VacationModel.document_employee_id).\
                     filter(VacationModel.rut == rut).\
                     filter(DocumentEmployeeModel.document_type_id == 6).\
@@ -42,7 +42,7 @@ class VacationClass:
         except Exception as e:
             error_message = str(e)
             return f"Error: {error_message}"
-    
+        
     def get(self, field, value):
         try:
             data = self.db.query(VacationModel).filter(getattr(VacationModel, field) == value).first()

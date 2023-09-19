@@ -565,13 +565,14 @@ class UpdateEmployeeBankAccount(BaseModel):
     account_number: str = None
 
 class DocumentEmployee(BaseModel):
-    id: int
     status_id: int
     document_type_id: int
-    old_document_status_id: int
     rut: int
-    added_date: str
-    updated_date: str
+
+class DocumentManagement(BaseModel):
+    status_id: int
+    document_type_id: int
+    rut: int
 
 class UpdateDocumentEmployee(BaseModel):
     status_id: int = None

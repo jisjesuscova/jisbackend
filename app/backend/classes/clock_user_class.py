@@ -73,7 +73,7 @@ class ClockUserClass:
         return result
     
     def update(self, id, clock_user_inputs):
-        if clock_user_inputs['rut'] != None:
+        if 'rut' in clock_user_inputs and clock_user_inputs['rut'] is not None:
             rut = HelperClass().numeric_rut(str(clock_user_inputs['rut']))
 
         status_id = self.verifiy(rut)
@@ -82,12 +82,13 @@ class ClockUserClass:
             clock_user =self.db.query(ClockUserModel).filter(ClockUserModel.rut == id).first()
             
             clock_user.rut = rut
-            if clock_user_inputs['names'] != None and clock_user_inputs['father_lastname'] != None:
+
+            if 'names' in clock_user_inputs and clock_user_inputs['names'] is not None:
                 upper_string = clock_user_inputs['names'] + " " + clock_user_inputs['father_lastname']
                 upper_string = HelperClass().upper_string(upper_string)
                 clock_user.full_name = upper_string
             
-            if clock_user_inputs['privilege'] != None:
+            if 'privilege' in clock_user_inputs and clock_user_inputs['privilege'] is not None:
                 clock_user.privilege = clock_user_inputs['privilege']
 
             clock_user.updated_date = datetime.now()

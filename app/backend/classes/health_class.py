@@ -6,7 +6,7 @@ class HealthClass:
 
     def get_all(self):
         try:
-            data = self.db.query(HealthModel).order_by(HealthModel.id).all()
+            data = self.db.query(HealthModel).order_by(HealthModel.health).all()
             if not data:
                 return "No data found"
             return data

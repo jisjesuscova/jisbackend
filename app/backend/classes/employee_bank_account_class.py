@@ -50,16 +50,19 @@ class EmployeeBankAccountClass:
     def update(self, id, employee_bank_account_inputs):
         employee_bank_account =  self.db.query(EmployeeBankAccountModel).filter(EmployeeBankAccountModel.rut == id).one_or_none()
 
-        if employee_bank_account_inputs['bank_id'] != None:
+        if 'bank_id' in employee_bank_account_inputs and employee_bank_account_inputs['bank_id'] is not None:
             employee_bank_account.bank_id = employee_bank_account_inputs['bank_id']
         
-        if employee_bank_account_inputs['account_type_id'] != None:
+        if 'account_type_id' in employee_bank_account_inputs and employee_bank_account_inputs['account_type_id'] is not None:
             employee_bank_account.account_type_id = employee_bank_account_inputs['account_type_id']
         
-        if employee_bank_account_inputs['rut'] != None:
+        if 'status_id' in employee_bank_account_inputs and employee_bank_account_inputs['status_id'] is not None:
+            employee_bank_account.status_id = employee_bank_account_inputs['status_id']
+        
+        if 'rut' in employee_bank_account_inputs and employee_bank_account_inputs['rut'] is not None:
             employee_bank_account.rut = employee_bank_account_inputs['rut']
 
-        if employee_bank_account_inputs['account_number'] != None:
+        if 'account_number' in employee_bank_account_inputs and employee_bank_account_inputs['account_number'] is not None:
             employee_bank_account.account_number = employee_bank_account_inputs['account_number']
 
         employee_bank_account.update_date = datetime.now()

@@ -13,7 +13,7 @@ class BranchOfficeClass:
                     order_by(BranchOfficeModel.branch_office). \
                     all()
             else:
-                data = self.db.query(BranchOfficeModel).order_by(BranchOfficeModel.id).all()
+                data = self.db.query(BranchOfficeModel).order_by(BranchOfficeModel.branch_office).all()
 
             if not data:
                 return "No data found"
