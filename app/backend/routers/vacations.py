@@ -20,6 +20,12 @@ def index(rut: int, page: int, session_user: UserLogin = Depends(get_current_act
 
     return {"message": data}
 
+@vacations.get("/pdf_all/{rut}/{page}")
+def pdf_index(rut: int, page: int, session_user: UserLogin = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    data = VacationClass(db).pdf_get_all(rut, 1)
+
+    return {"message": data}
+
 @vacations.get("/total_vacation_days_in_company")
 def total_vacation_days_in_company(session_user: UserLogin = Depends(get_current_active_user), db: Session = Depends(get_db)):
     data = VacationClass(db).calculate_total_vacation_days()
@@ -88,5 +94,11 @@ def upload(form_data: UploadVacation = Depends(UploadVacation.as_form), support:
 @vacations.get("/download/{id}")
 def download(id:int, session_user: UserLogin = Depends(get_current_active_user), db: Session = Depends(get_db)):
     data = VacationClass(db).download(id)
+
+    return {"message": data}
+
+@vacations.get("/sign/{id}")
+def sign(id:int, session_user: UserLogin = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    data = DocumentEmployeeClass(db).sign(id)
 
     return {"message": data}

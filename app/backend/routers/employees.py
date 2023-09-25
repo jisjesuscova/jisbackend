@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response, UploadFile, File
 from app.backend.db.database import get_db
 from sqlalchemy.orm import Session
-from app.backend.schemas import Employee, UpdateEmployee, SearchEmployee, UserLogin, EmployeeList
+from app.backend.schemas import Employee, UpdateEmployee, SearchEmployee, UserLogin, EmployeeList, UploadSignature, UploadPicture
 from app.backend.classes.employee_class import EmployeeClass
 from app.backend.auth.auth_user import get_current_active_user
+import base64
+import os
+from app.backend.classes.dropbox_class import DropboxClass
 
 employees = APIRouter(
     prefix="/employees",
@@ -23,6 +26,23 @@ def search(search_data: SearchEmployee, session_user: UserLogin = Depends(get_cu
     employees = EmployeeClass(db).search(search_data, search_data['page'])
 
     return {"message": employees}
+
+@employees.post("/signature")
+def signature(form_data: UploadSignature = Depends(UploadSignature.as_form), session_user: UserLogin = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    dropbox_client = DropboxClass(db)
+
+    filename = dropbox_client.sign(name=form_data.rut, description='firma', data=form_data.signature,
+                                 dropbox_path='/signatures/', computer_path=os.path.join('C:\\', 'Users', 'jesus', 'OneDrive', 'Desktop', 'erpjis_fastapi', 'backend', 'pre_upload_images'))
+    
+    employee_inputs = {}
+
+    employee_inputs['signature'] = filename
+
+    employee_inputs['signature_type_id'] = form_data.signature_type_id
+
+    EmployeeClass(db).update(form_data.rut, employee_inputs)
+    
+    return {"message": form_data.signature}
 
 @employees.get("/get_birthdays")
 def get_birthdays(session_user: UserLogin = Depends(get_current_active_user), db: Session = Depends(get_db)):
@@ -55,6 +75,18 @@ def delete(id:int, session_user: UserLogin = Depends(get_current_active_user), d
 
     return {"message": data}
 
+@employees.delete("/delete/signature/{rut}")
+def delete(rut:int, session_user: UserLogin = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    employee_inputs = {}  # Inicializa el diccionario
+        
+    employee_inputs['signature'] = ''
+
+    employee_inputs['signature_type_id'] = 0
+
+    EmployeeClass(db).update(rut, employee_inputs)
+
+    return {"message": rut}
+
 @employees.patch("/update/{id}")
 def update(id: int, employee: UpdateEmployee, session_user: UserLogin = Depends(get_current_active_user), db: Session = Depends(get_db)):
     employee_inputs = employee.dict()
@@ -68,3 +100,34 @@ def validate(cellphone: int, session_user: UserLogin = Depends(get_current_activ
     data = EmployeeClass(db).validate_cellphone(cellphone)
 
     return {"message": data}
+
+@employees.post("/upload/picture")
+def upload(form_data: UploadPicture = Depends(UploadPicture.as_form), picture: UploadFile = File(...), session_user: UserLogin = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    dropbox_client = DropboxClass(db)
+
+    filename = dropbox_client.upload(name=form_data.rut, description='foto', data=picture,
+                                 dropbox_path='/pictures/', computer_path=os.path.join('C:\\', 'Users', 'jesus', 'OneDrive', 'Desktop', 'erpjis_fastapi', 'backend', 'app', 'backend'))
+    
+    employee_inputs = {}
+
+    employee_inputs['picture'] = filename
+
+    data = EmployeeClass(db).update(form_data.rut, employee_inputs)
+
+    return {"message": data}
+
+@employees.delete("/delete/picture/{rut}")
+def delete(rut:int, session_user: UserLogin = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    employee = EmployeeClass(db).one_simple_get(rut)
+
+    employee_inputs = {}  # Inicializa el diccionario
+        
+    employee_inputs['picture'] = ''
+
+    EmployeeClass(db).update(rut, employee_inputs)
+
+    dropbox_client = DropboxClass(db)
+
+    dropbox_client.delete('/pictures/', employee.picture)
+
+    return {"message": rut}

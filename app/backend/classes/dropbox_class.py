@@ -6,8 +6,8 @@ from app.backend.classes.helper_class import HelperClass
 from flask_login import current_user
 from datetime import datetime
 import os
-import imghdr
 from pathlib import Path
+import base64
 
 class DropboxClass():
     def __init__(self, db):
@@ -78,7 +78,7 @@ class DropboxClass():
 
         f = data['file']
         extesion = os.path.splitext(f.filename)[1]
-        dropbox_file_name = HelperClass(self.db).file_name(str(name), str(description))
+        dropbox_file_name = HelperClass().file_name(str(name), str(description))
 
         dropbox_path = dropbox_path + dropbox_file_name + extesion
         computer_path = computer_path + dropbox_file_name + extesion
@@ -91,23 +91,41 @@ class DropboxClass():
         else:
             return 0
 
-    def sign(self, name = '', description = '', data = '', dropbox_path = '', computer_path = ''):
-        settings = SettingClass.get()
+    def sign(self, name='', description='', data='', dropbox_path='', computer_path=''):
+        settings = SettingClass(self.db).get()
 
-        f = data['file']
-        
-        extesion = os.path.splitext(f.filename)[1]
-        dropbox_file_name = HelperClass(self.db).file_name(str(name), str(description))
+        # Decodifica la imagen desde base64
+        signature_bytes = base64.b64decode(data.split(',')[1])
+            
+        # Directorio donde se guardará la imagen
+        upload_dir = "pre_upload_images"
+            
+        # Asegúrate de que el directorio exista
+        if not os.path.exists(upload_dir):
+            os.makedirs(upload_dir)
+            
+        # Nombre del archivo
+        file_name = f"{name}_signature.jpg"
+            
+        # Ruta completa del archivo
+        file_path = os.path.join(upload_dir, file_name)
+            
+        # Guarda la imagen en el servidor
+        with open(file_path, "wb") as f:
+            f.write(signature_bytes)
 
-        dropbox_path = dropbox_path + dropbox_file_name + extesion
-        computer_path = computer_path + dropbox_file_name + extesion
-
-        f.save(os.path.join(computer_path))
+        dropbox_path = dropbox_path + file_name
+        computer_path = computer_path + '\\' + file_name
 
         dbx = dropbox.Dropbox(settings.dropbox_token)
-        if dbx.files_upload(open(os.path.join(computer_path), "rb").read(), dropbox_path,  mode=dropbox.files.WriteMode('overwrite')):
-            return dropbox_file_name + extesion
-        else:
+
+        # Subir el archivo a Dropbox
+        try:
+            with open(computer_path, "rb") as f:
+                dbx.files_upload(f.read(), dropbox_path, mode=dropbox.files.WriteMode('overwrite'))
+            return file_name
+        except Exception as e:
+            print(f"Error al subir el archivo a Dropbox: {str(e)}")
             return 0
 
     def signature(self, file = ''):

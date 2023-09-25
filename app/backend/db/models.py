@@ -142,6 +142,7 @@ class EmployeeModel(Base):
     mother_lastname = Column(String(255))
     gender_id = Column(Integer)
     nationality_id = Column(Integer)
+    signature_type_id = Column(Integer)
     personal_email = Column(String(255))
     cellphone = Column(String(100))
     born_date = Column(Date())
@@ -562,6 +563,15 @@ class DocumentEmployeeModel(Base):
     old_document_status_id = Column(Integer)
     rut = Column(Integer)
     support = Column(String(255))
+    added_date =  Column(DateTime())
+    updated_date = Column(DateTime())
+
+class DocumentEmployeeSignatureModel(Base):
+    __tablename__ = 'documents_employees_signatures'
+
+    id = Column(Integer, primary_key=True)
+    document_employee_id = Column(Integer)
+    rut = Column(Integer)
     added_date =  Column(DateTime())
     updated_date = Column(DateTime())
 

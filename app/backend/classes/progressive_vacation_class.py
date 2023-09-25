@@ -14,7 +14,7 @@ class ProgressiveVacationClass:
 
     def get_all(self, rut, page = 1, items_per_page = 10):
         try:
-            data_query = self.db.query(DocumentEmployeeModel.document_type_id, ProgressiveVacationModel.document_employee_id, DocumentEmployeeModel.support, ProgressiveVacationModel.rut, ProgressiveVacationModel.id, ProgressiveVacationModel.since, ProgressiveVacationModel.until, ProgressiveVacationModel.days, ProgressiveVacationModel.no_valid_days).\
+            data_query = self.db.query(DocumentEmployeeModel.document_type_id, DocumentEmployeeModel.status_id, ProgressiveVacationModel.document_employee_id, DocumentEmployeeModel.support, ProgressiveVacationModel.rut, ProgressiveVacationModel.id, ProgressiveVacationModel.since, ProgressiveVacationModel.until, ProgressiveVacationModel.days, ProgressiveVacationModel.no_valid_days).\
                     outerjoin(DocumentEmployeeModel, DocumentEmployeeModel.id == ProgressiveVacationModel.document_employee_id).\
                     filter(ProgressiveVacationModel.rut == rut).\
                     filter(DocumentEmployeeModel.document_type_id == 36).\
@@ -42,6 +42,36 @@ class ProgressiveVacationClass:
             error_message = str(e)
             return f"Error: {error_message}"
     
+    def pdf_get_all(self, rut, page = 1, items_per_page = 10):
+        try:
+            data_query = self.db.query(DocumentEmployeeModel.document_type_id, DocumentEmployeeModel.status_id, ProgressiveVacationModel.document_employee_id, DocumentEmployeeModel.support, ProgressiveVacationModel.rut, ProgressiveVacationModel.id, ProgressiveVacationModel.since, ProgressiveVacationModel.until, ProgressiveVacationModel.days, ProgressiveVacationModel.no_valid_days).\
+                    outerjoin(DocumentEmployeeModel, DocumentEmployeeModel.id == ProgressiveVacationModel.document_employee_id).\
+                    filter(ProgressiveVacationModel.rut == rut).\
+                    filter(DocumentEmployeeModel.document_type_id == 36).\
+                    order_by(desc(ProgressiveVacationModel.since))
+            
+            total_items = data_query.count()
+            total_pages = (total_items + items_per_page - 1) // items_per_page
+
+            if page < 1 or page > total_pages:
+                return "Invalid page number"
+
+            data = data_query.offset((page - 1) * items_per_page).limit(items_per_page).all()
+
+            if not data:
+                return "No data found"
+
+            return {
+                "total_items": total_items,
+                "total_pages": total_pages,
+                "current_page": page,
+                "items_per_page": items_per_page,
+                "data": data
+            }
+        except Exception as e:
+            error_message = str(e)
+            return f"Error: {error_message}"
+        
     def get(self, field, value):
         try:
             data = self.db.query(ProgressiveVacationModel).filter(getattr(ProgressiveVacationModel, field) == value).first()

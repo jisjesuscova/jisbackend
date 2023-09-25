@@ -42,6 +42,36 @@ class VacationClass:
         except Exception as e:
             error_message = str(e)
             return f"Error: {error_message}"
+    
+    def pdf_get_all(self, rut, page = 1, items_per_page = 10):
+        try:
+            data_query = self.db.query(DocumentEmployeeModel.status_id, DocumentEmployeeModel.document_type_id, VacationModel.document_employee_id, DocumentEmployeeModel.support, VacationModel.rut, VacationModel.id, VacationModel.since, VacationModel.until, VacationModel.days, VacationModel.no_valid_days).\
+                    outerjoin(DocumentEmployeeModel, DocumentEmployeeModel.id == VacationModel.document_employee_id).\
+                    filter(VacationModel.rut == rut).\
+                    filter(DocumentEmployeeModel.document_type_id == 6).\
+                    order_by(desc(VacationModel.since))
+            
+            total_items = data_query.count()
+            total_pages = (total_items + items_per_page - 1) // items_per_page
+
+            if page < 1 or page > total_pages:
+                return "Invalid page number"
+
+            data = data_query.offset((page - 1) * items_per_page).limit(items_per_page).all()
+
+            if not data:
+                return "No data found"
+
+            return {
+                "total_items": total_items,
+                "total_pages": total_pages,
+                "current_page": page,
+                "items_per_page": items_per_page,
+                "data": data
+            }
+        except Exception as e:
+            error_message = str(e)
+            return f"Error: {error_message}"
         
     def get(self, field, value):
         try:
@@ -77,7 +107,7 @@ class VacationClass:
         try:
             data = self.db.query(DocumentEmployeeModel).filter(DocumentEmployeeModel.id == id).first()
 
-            file = DropboxClass(self.db).get('/employee_documents/', data.support)
+            file = DropboxClass(self.db).get('/signatures/', data.support)
 
             return file
         except Exception as e:

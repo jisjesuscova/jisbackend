@@ -687,6 +687,28 @@ class UploadVacation(BaseModel):
                 ):
         return cls(vacation_id=vacation_id, rut=rut)
 
+class UploadSignature(BaseModel):
+    rut: int
+    signature: str
+    signature_type_id: int
+
+    @classmethod
+    def as_form(cls,
+                    rut: int = Form(),
+                    signature: str = Form(),
+                    signature_type_id: int = Form()
+                ):
+        return cls(rut=rut, signature=signature, signature_type_id=signature_type_id)
+
+class UploadPicture(BaseModel):
+    rut: int
+
+    @classmethod
+    def as_form(cls,
+                    rut: int = Form()
+                ):
+        return cls(rut=rut)
+    
 class UploadProgressiveVacation(BaseModel):
     progressive_vacation_id: int
     rut: int

@@ -64,3 +64,9 @@ def update(id: int, document_employee: UpdateDocumentEmployee, db: Session = Dep
     data = DocumentEmployeeClass(db).update(id, document_employee)
 
     return {"message": data}
+
+@documents_employees.get("/requested/{rut}/{page}")
+def requested(rut:int, page:int, db: Session = Depends(get_db)):
+    data = DocumentEmployeeClass(db).supervisor_get_all(rut, page)
+
+    return {"message": data}

@@ -2,6 +2,7 @@ from app.backend.db.models import EmployeeModel, EmployeeLaborDatumModel, ClockU
 from datetime import datetime
 from sqlalchemy import func
 from app.backend.classes.helper_class import HelperClass
+from app.backend.classes.dropbox_class import DropboxClass
 
 class EmployeeClass:
     def __init__(self, db):
@@ -155,11 +156,34 @@ class EmployeeClass:
                 filter(getattr(EmployeeModel, field) == value). \
                 first()
 
-            return data
+            signature = DropboxClass(self.db).get('/signatures/', str(data[0].signature))
+
+            if data[0].picture == '' or data[0].picture == None:
+                picture = ''
+            else:
+                picture = DropboxClass(self.db).get('/pictures/', str(data[0].picture))
+
+            result = {
+                "employee_data": {
+                    "data": data
+                },
+                "signature": signature,
+                "picture": picture,
+            }
+
+            return result
         except Exception as e:
             error_message = str(e)
             return f"Error: {error_message}"
-        
+    
+    def one_simple_get(self, rut):
+        try:
+            employee = self.db.query(EmployeeModel).filter(EmployeeModel.rut==rut).first()
+
+            return employee
+        except Exception as e:
+            error_message = str(e)
+            return f"Error: {error_message}"
 
     def is_active(self, rut):
         employee = self.db.query(EmployeeModel).filter(EmployeeModel.rut==rut).count()
@@ -236,6 +260,15 @@ class EmployeeClass:
         
         if 'born_date' in employee_inputs and employee_inputs['born_date'] is not None:
             employee.born_date = employee_inputs['born_date']
+
+        if 'signature' in employee_inputs and employee_inputs['signature'] is not None:
+            employee.signature = employee_inputs['signature']
+
+        if 'signature_type_id' in employee_inputs and employee_inputs['signature_type_id'] is not None:
+            employee.signature_type_id = employee_inputs['signature_type_id']
+
+        if 'picture' in employee_inputs and employee_inputs['picture'] is not None:
+            employee.picture = employee_inputs['picture']
 
         employee.update_date = datetime.now()
 
