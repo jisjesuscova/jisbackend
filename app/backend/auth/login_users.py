@@ -33,6 +33,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         "job_position": user.job_position,
         "signature": signature,
         "signature_type_id": user.signature_type_id,
+        "full_name": user.names +' '+ user.father_lastname +' '+ user.mother_lastname,
         "token_type": "bearer"
     }
 
