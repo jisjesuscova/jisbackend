@@ -8,6 +8,7 @@ from app.backend.classes.dropbox_class import DropboxClass
 from app.backend.auth.auth_user import get_current_active_user
 import os
 import requests
+from fastapi.responses import JSONResponse
 
 vacations = APIRouter(
     prefix="/vacations",

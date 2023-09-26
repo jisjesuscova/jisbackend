@@ -476,6 +476,20 @@ class VacationModel(Base):
     added_date = Column(DateTime())
     updated_date = Column(DateTime())
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "rut": self.rut,
+            "since": str(self.since),
+            "since": str(self.since),
+            "until": str(self.until),
+            "days": self.days,
+            "no_valid_days": self.no_valid_days,
+            "support": str(self.support),
+            "added_date": str(self.added_date),
+            "updated_date": str(self.updated_date),
+        }
+    
 class ProgressiveVacationModel(Base):
     __tablename__ = 'progressive_vacations'
 

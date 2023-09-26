@@ -1,4 +1,4 @@
-from app.backend.db.models import DocumentEmployeeModel, DocumentEmployeeSignatureModel, EmployeeLaborDatumModel, BranchOfficeModel, SupervisorModel, EmployeeModel
+from app.backend.db.models import DocumentEmployeeModel, DocumentEmployeeSignatureModel, EmployeeLaborDatumModel, BranchOfficeModel, SupervisorModel, EmployeeModel, DocumentTypeModel
 from datetime import datetime
 
 class DocumentEmployeeClass:
@@ -17,13 +17,15 @@ class DocumentEmployeeClass:
         
     def supervisor_get_all(self, rut=None, page=1, items_per_page=10):
         try:
-            data_query = self.db.query(DocumentEmployeeModel.status_id, DocumentEmployeeModel.rut, DocumentEmployeeModel.id, DocumentEmployeeModel.added_date,
+            data_query = self.db.query(DocumentTypeModel.document_type, DocumentEmployeeModel.status_id, DocumentEmployeeModel.rut, DocumentEmployeeModel.id, DocumentEmployeeModel.added_date,
                                     EmployeeModel.names, EmployeeModel.father_lastname, EmployeeModel.mother_lastname). \
                                     outerjoin(EmployeeLaborDatumModel, EmployeeLaborDatumModel.rut == DocumentEmployeeModel.rut). \
                                     outerjoin(EmployeeModel, EmployeeModel.rut == EmployeeLaborDatumModel.rut). \
                                     outerjoin(SupervisorModel, SupervisorModel.branch_office_id == EmployeeLaborDatumModel.branch_office_id). \
+                                    outerjoin(DocumentTypeModel, DocumentTypeModel.id == DocumentEmployeeModel.document_type_id). \
                                     filter(SupervisorModel.rut == '10923452'). \
                                     filter(DocumentEmployeeModel.status_id == 1). \
+                                    filter(DocumentTypeModel.document_group_id == 2). \
                                     order_by(DocumentEmployeeModel.id.desc())
 
             total_items = data_query.count()

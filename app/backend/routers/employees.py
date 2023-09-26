@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from app.backend.schemas import Employee, UpdateEmployee, SearchEmployee, UserLogin, EmployeeList, UploadSignature, UploadPicture
 from app.backend.classes.employee_class import EmployeeClass
 from app.backend.auth.auth_user import get_current_active_user
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 import base64
 import os
 from app.backend.classes.dropbox_class import DropboxClass
@@ -48,7 +50,9 @@ def signature(form_data: UploadSignature = Depends(UploadSignature.as_form), ses
 def get_birthdays(session_user: UserLogin = Depends(get_current_active_user), db: Session = Depends(get_db)):
     data = EmployeeClass(db).get_birthdays()
 
-    return {"message": data}
+    json_compatible_item_data = jsonable_encoder(data)
+    return JSONResponse(content=json_compatible_item_data)
+
 
 @employees.get("/get_genders_total")
 def gender_totals(session_user: UserLogin = Depends(get_current_active_user), db: Session = Depends(get_db)):
