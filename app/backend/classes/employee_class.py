@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy import func
 from app.backend.classes.helper_class import HelperClass
 from app.backend.classes.dropbox_class import DropboxClass
+import json
 
 class EmployeeClass:
     def __init__(self, db):
@@ -299,7 +300,10 @@ class EmployeeClass:
         .limit(4) \
         .all()
 
-        return employees
+        # Serializar la lista de objetos employees a formato JSON
+        serialized_employees = json.dumps([employee._asdict() for employee in employees])
+
+        return serialized_employees
     
     def gender_totals(self):
         men_total = self.db.query(EmployeeModel).filter(EmployeeModel.gender_id == 1).count()
