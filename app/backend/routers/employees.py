@@ -48,7 +48,7 @@ def signature(form_data: UploadSignature = Depends(UploadSignature.as_form), ses
 def get_birthdays(session_user: UserLogin = Depends(get_current_active_user), db: Session = Depends(get_db)):
     data = EmployeeClass(db).get_birthdays()
 
-    return {"message": 1}
+    return {"message": data}
 
 @employees.get("/get_genders_total")
 def gender_totals(session_user: UserLogin = Depends(get_current_active_user), db: Session = Depends(get_db)):
