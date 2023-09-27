@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy import desc
 from app.backend.classes.dropbox_class import DropboxClass
 from app.backend.classes.helper_class import HelperClass
+import json
 
 class MedicalLicenseClass:
     def __init__(self, db):
@@ -18,19 +19,39 @@ class MedicalLicenseClass:
             error_message = str(e)
             return f"Error: {error_message}"
     
-    def get(self, field, value, type = 1, page = 1, items_per_page = 10):
+    def get(self, field, value, type=1, page=1, items_per_page=10):
         try:
             if type == 1:
                 data = self.db.query(MedicalLicenseModel).filter(getattr(MedicalLicenseModel, field) == value).first()
-
-                return data
+                if data:
+                    # Serializar el objeto MedicalLicenseModel a un diccionario
+                    serialized_data = {
+                        "document_employee_id": data.document_employee_id,
+                        "document_type_id": data.document_type_id,
+                        "folio": data.folio,
+                        "since": data.since.strftime('%Y-%m-%d') if data.since else None,
+                        "until": data.until.strftime('%Y-%m-%d') if data.until else None,
+                        "days": data.days,
+                        "support": data.support,
+                        "status_id": data.status_id,
+                        "id": data.id
+                    }
+                    return serialized_data
+                else:
+                    return "No data found"
             else:
-                data_query = self.db.query(MedicalLicenseModel.document_employee_id, DocumentEmployeeModel.document_type_id, MedicalLicenseModel.folio, EmployeeModel.visual_rut, MedicalLicenseModel.since, MedicalLicenseModel.until, MedicalLicenseModel.days, DocumentEmployeeModel.support, DocumentEmployeeModel.status_id, MedicalLicenseModel.id).\
-                    outerjoin(DocumentEmployeeModel, DocumentEmployeeModel.id == MedicalLicenseModel.document_employee_id).\
-                    outerjoin(EmployeeModel, EmployeeModel.rut == MedicalLicenseModel.rut).\
-                    filter(getattr(MedicalLicenseModel, field) == value).\
-                    filter(DocumentEmployeeModel.document_type_id == 35).\
-                    order_by(desc(MedicalLicenseModel.since))
+                data_query = self.db.query(
+                    MedicalLicenseModel.document_employee_id,
+                    DocumentEmployeeModel.document_type_id,
+                    MedicalLicenseModel.folio,
+                    EmployeeModel.visual_rut,
+                    MedicalLicenseModel.since,
+                    MedicalLicenseModel.until,
+                    MedicalLicenseModel.days,
+                    DocumentEmployeeModel.support,
+                    DocumentEmployeeModel.status_id,
+                    MedicalLicenseModel.id
+                ).outerjoin(DocumentEmployeeModel, DocumentEmployeeModel.id == MedicalLicenseModel.document_employee_id).outerjoin(EmployeeModel, EmployeeModel.rut == MedicalLicenseModel.rut).filter(getattr(MedicalLicenseModel, field) == value).filter(DocumentEmployeeModel.document_type_id == 35).order_by(desc(MedicalLicenseModel.since))
 
                 total_items = data_query.count()
                 total_pages = (total_items + items_per_page - 1) // items_per_page
@@ -43,13 +64,32 @@ class MedicalLicenseClass:
                 if not data:
                     return "No data found"
 
-                return {
+                # Serializar la lista de objetos MedicalLicenseModel a una lista de diccionarios
+                serialized_data = {
                     "total_items": total_items,
                     "total_pages": total_pages,
                     "current_page": page,
                     "items_per_page": items_per_page,
-                    "data": data
+                    "data": [
+                        {
+                            "document_employee_id": item.document_employee_id,
+                            "document_type_id": item.document_type_id,
+                            "folio": item.folio,
+                            "visual_rut": item.visual_rut,
+                            "since": item.since.strftime('%Y-%m-%d') if item.since else None,
+                            "until": item.until.strftime('%Y-%m-%d') if item.until else None,
+                            "days": item.days,
+                            "support": item.support,
+                            "status_id": item.status_id,
+                            "id": item.id
+                        }
+                        for item in data
+                    ]
                 }
+
+                serialized_result = json.dumps(serialized_data)
+
+                return serialized_result
         except Exception as e:
             error_message = str(e)
             return f"Error: {error_message}"
