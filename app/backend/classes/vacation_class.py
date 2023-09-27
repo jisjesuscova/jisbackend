@@ -8,12 +8,13 @@ from datetime import datetime
 from sqlalchemy import desc
 from sqlalchemy import or_
 from app.backend.classes.dropbox_class import DropboxClass
+import json
 
 class VacationClass:
     def __init__(self, db):
         self.db = db
 
-    def get_all(self, rut, page = 1, items_per_page = 10):
+    def get_all(self, rut, page=1, items_per_page=10):
         try:
             data_query = self.db.query(DocumentEmployeeModel.status_id, DocumentEmployeeModel.document_type_id, VacationModel.document_employee_id, DocumentEmployeeModel.support, VacationModel.rut, VacationModel.id, VacationModel.since, VacationModel.until, VacationModel.days, VacationModel.no_valid_days).\
                     outerjoin(DocumentEmployeeModel, DocumentEmployeeModel.id == VacationModel.document_employee_id).\
@@ -32,25 +33,53 @@ class VacationClass:
             if not data:
                 return "No data found"
 
-            return {
+            # Serializar los datos en una estructura de diccionario
+            serialized_data = {
                 "total_items": total_items,
                 "total_pages": total_pages,
                 "current_page": page,
                 "items_per_page": items_per_page,
-                "data": data
+                "data": [
+                    {
+                        "status_id": item.status_id,
+                        "document_type_id": item.document_type_id,
+                        "document_employee_id": item.document_employee_id,
+                        "support": item.support,
+                        "rut": item.rut,
+                        "id": item.id,
+                        "since": item.since.strftime('%Y-%m-%d') if item.since else None,
+                        "until": item.until.strftime('%Y-%m-%d') if item.until else None,
+                        "days": item.days,
+                        "no_valid_days": item.no_valid_days
+                    }
+                    for item in data
+                ]
             }
+
+            # Convierte el resultado a una cadena JSON
+            serialized_result = json.dumps(serialized_data)
+
+            return serialized_result
         except Exception as e:
             error_message = str(e)
             return f"Error: {error_message}"
+
     
-    def pdf_get_all(self, rut, page = 1, items_per_page = 10):
+    def pdf_get_all(self, rut, page=1, items_per_page=10):
         try:
-            data_query = self.db.query(DocumentEmployeeModel.status_id, DocumentEmployeeModel.document_type_id, VacationModel.document_employee_id, DocumentEmployeeModel.support, VacationModel.rut, VacationModel.id, VacationModel.since, VacationModel.until, VacationModel.days, VacationModel.no_valid_days).\
-                    outerjoin(DocumentEmployeeModel, DocumentEmployeeModel.id == VacationModel.document_employee_id).\
-                    filter(VacationModel.rut == rut).\
-                    filter(DocumentEmployeeModel.document_type_id == 6).\
-                    order_by(desc(VacationModel.since))
-            
+            data_query = self.db.query(
+                DocumentEmployeeModel.status_id,
+                DocumentEmployeeModel.document_type_id,
+                VacationModel.document_employee_id,
+                DocumentEmployeeModel.support,
+                VacationModel.rut,
+                VacationModel.id,
+                VacationModel.since,
+                VacationModel.until,
+                VacationModel.days,
+                VacationModel.no_valid_days
+            ).outerjoin(DocumentEmployeeModel, DocumentEmployeeModel.id == VacationModel.document_employee_id).filter(VacationModel.rut == rut).filter(DocumentEmployeeModel.document_type_id == 6).order_by(desc(VacationModel.since))
+
             total_items = data_query.count()
             total_pages = (total_items + items_per_page - 1) // items_per_page
 
@@ -62,13 +91,33 @@ class VacationClass:
             if not data:
                 return "No data found"
 
-            return {
+            # Serializar los datos en una estructura de diccionario
+            serialized_data = {
                 "total_items": total_items,
                 "total_pages": total_pages,
                 "current_page": page,
                 "items_per_page": items_per_page,
-                "data": data
+                "data": [
+                    {
+                        "status_id": item.status_id,
+                        "document_type_id": item.document_type_id,
+                        "document_employee_id": item.document_employee_id,
+                        "support": item.support,
+                        "rut": item.rut,
+                        "id": item.id,
+                        "since": item.since.strftime('%Y-%m-%d') if item.since else None,
+                        "until": item.until.strftime('%Y-%m-%d') if item.until else None,
+                        "days": item.days,
+                        "no_valid_days": item.no_valid_days
+                    }
+                    for item in data
+                ]
             }
+
+            # Convierte el resultado a una cadena JSON
+            serialized_result = json.dumps(serialized_data)
+
+            return serialized_result
         except Exception as e:
             error_message = str(e)
             return f"Error: {error_message}"

@@ -7,19 +7,27 @@ from datetime import datetime
 from sqlalchemy import desc
 from sqlalchemy import or_
 from app.backend.classes.dropbox_class import DropboxClass
+import json
 
 class ProgressiveVacationClass:
     def __init__(self, db):
         self.db = db
 
-    def get_all(self, rut, page = 1, items_per_page = 10):
+    def get_all(self, rut, page=1, items_per_page=10):
         try:
-            data_query = self.db.query(DocumentEmployeeModel.document_type_id, DocumentEmployeeModel.status_id, ProgressiveVacationModel.document_employee_id, DocumentEmployeeModel.support, ProgressiveVacationModel.rut, ProgressiveVacationModel.id, ProgressiveVacationModel.since, ProgressiveVacationModel.until, ProgressiveVacationModel.days, ProgressiveVacationModel.no_valid_days).\
-                    outerjoin(DocumentEmployeeModel, DocumentEmployeeModel.id == ProgressiveVacationModel.document_employee_id).\
-                    filter(ProgressiveVacationModel.rut == rut).\
-                    filter(DocumentEmployeeModel.document_type_id == 36).\
-                    order_by(desc(ProgressiveVacationModel.since))
-            
+            data_query = self.db.query(
+                DocumentEmployeeModel.document_type_id,
+                DocumentEmployeeModel.status_id,
+                ProgressiveVacationModel.document_employee_id,
+                DocumentEmployeeModel.support,
+                ProgressiveVacationModel.rut,
+                ProgressiveVacationModel.id,
+                ProgressiveVacationModel.since,
+                ProgressiveVacationModel.until,
+                ProgressiveVacationModel.days,
+                ProgressiveVacationModel.no_valid_days
+            ).outerjoin(DocumentEmployeeModel, DocumentEmployeeModel.id == ProgressiveVacationModel.document_employee_id).filter(ProgressiveVacationModel.rut == rut).filter(DocumentEmployeeModel.document_type_id == 36).order_by(desc(ProgressiveVacationModel.since))
+
             total_items = data_query.count()
             total_pages = (total_items + items_per_page - 1) // items_per_page
 
@@ -31,25 +39,52 @@ class ProgressiveVacationClass:
             if not data:
                 return "No data found"
 
-            return {
+            # Serializar los datos en una estructura de diccionario
+            serialized_data = {
                 "total_items": total_items,
                 "total_pages": total_pages,
                 "current_page": page,
                 "items_per_page": items_per_page,
-                "data": data
+                "data": [
+                    {
+                        "document_type_id": item.document_type_id,
+                        "status_id": item.status_id,
+                        "document_employee_id": item.document_employee_id,
+                        "support": item.support,
+                        "rut": item.rut,
+                        "id": item.id,
+                        "since": item.since.strftime('%Y-%m-%d') if item.since else None,
+                        "until": item.until.strftime('%Y-%m-%d') if item.until else None,
+                        "days": item.days,
+                        "no_valid_days": item.no_valid_days
+                    }
+                    for item in data
+                ]
             }
+
+            # Convierte el resultado a una cadena JSON
+            serialized_result = json.dumps(serialized_data)
+
+            return serialized_result
         except Exception as e:
             error_message = str(e)
             return f"Error: {error_message}"
     
     def pdf_get_all(self, rut, page = 1, items_per_page = 10):
         try:
-            data_query = self.db.query(DocumentEmployeeModel.document_type_id, DocumentEmployeeModel.status_id, ProgressiveVacationModel.document_employee_id, DocumentEmployeeModel.support, ProgressiveVacationModel.rut, ProgressiveVacationModel.id, ProgressiveVacationModel.since, ProgressiveVacationModel.until, ProgressiveVacationModel.days, ProgressiveVacationModel.no_valid_days).\
-                    outerjoin(DocumentEmployeeModel, DocumentEmployeeModel.id == ProgressiveVacationModel.document_employee_id).\
-                    filter(ProgressiveVacationModel.rut == rut).\
-                    filter(DocumentEmployeeModel.document_type_id == 36).\
-                    order_by(desc(ProgressiveVacationModel.since))
-            
+            data_query = self.db.query(
+                DocumentEmployeeModel.document_type_id,
+                DocumentEmployeeModel.status_id,
+                ProgressiveVacationModel.document_employee_id,
+                DocumentEmployeeModel.support,
+                ProgressiveVacationModel.rut,
+                ProgressiveVacationModel.id,
+                ProgressiveVacationModel.since,
+                ProgressiveVacationModel.until,
+                ProgressiveVacationModel.days,
+                ProgressiveVacationModel.no_valid_days
+            ).outerjoin(DocumentEmployeeModel, DocumentEmployeeModel.id == ProgressiveVacationModel.document_employee_id).filter(ProgressiveVacationModel.rut == rut).filter(DocumentEmployeeModel.document_type_id == 36).order_by(desc(ProgressiveVacationModel.since))
+
             total_items = data_query.count()
             total_pages = (total_items + items_per_page - 1) // items_per_page
 
@@ -61,13 +96,33 @@ class ProgressiveVacationClass:
             if not data:
                 return "No data found"
 
-            return {
+            # Serializar los datos en una estructura de diccionario
+            serialized_data = {
                 "total_items": total_items,
                 "total_pages": total_pages,
                 "current_page": page,
                 "items_per_page": items_per_page,
-                "data": data
+                "data": [
+                    {
+                        "document_type_id": item.document_type_id,
+                        "status_id": item.status_id,
+                        "document_employee_id": item.document_employee_id,
+                        "support": item.support,
+                        "rut": item.rut,
+                        "id": item.id,
+                        "since": item.since.strftime('%Y-%m-%d') if item.since else None,
+                        "until": item.until.strftime('%Y-%m-%d') if item.until else None,
+                        "days": item.days,
+                        "no_valid_days": item.no_valid_days
+                    }
+                    for item in data
+                ]
             }
+
+            # Convierte el resultado a una cadena JSON
+            serialized_result = json.dumps(serialized_data)
+
+            return serialized_result
         except Exception as e:
             error_message = str(e)
             return f"Error: {error_message}"

@@ -119,4 +119,3 @@ app.include_router(employee_types)
 app.include_router(regimes)
 app.include_router(salary_settlements)
 app.include_router(document_managements)
-
