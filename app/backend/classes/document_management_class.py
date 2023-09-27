@@ -1,18 +1,25 @@
 from app.backend.db.models import DocumentEmployeeModel
 from datetime import datetime
 from sqlalchemy import desc
+import json
 
 class DocumentManagementClass:
     def __init__(self, db):
         self.db = db
 
-    def get_all(self, rut, page = 1, items_per_page = 10):
+    def get_all(self, rut, page=1, items_per_page=10):
         try:
-            data_query = self.db.query(DocumentEmployeeModel.status_id, DocumentEmployeeModel.document_type_id, DocumentEmployeeModel.added_date, DocumentEmployeeModel.support, DocumentEmployeeModel.id).\
-                    filter(DocumentEmployeeModel.rut == rut).\
-                    filter(DocumentEmployeeModel.document_type_id == 4).\
-                    order_by(desc(DocumentEmployeeModel.id))
-            
+            data_query = self.db.query(
+                DocumentEmployeeModel.status_id,
+                DocumentEmployeeModel.document_type_id,
+                DocumentEmployeeModel.added_date,
+                DocumentEmployeeModel.support,
+                DocumentEmployeeModel.id
+            ) \
+                .filter(DocumentEmployeeModel.rut == rut) \
+                .filter(DocumentEmployeeModel.document_type_id == 4) \
+                .order_by(desc(DocumentEmployeeModel.id))
+
             total_items = data_query.count()
             total_pages = (total_items + items_per_page - 1) // items_per_page
 
@@ -24,13 +31,27 @@ class DocumentManagementClass:
             if not data:
                 return "No data found"
 
-            return {
+            # Serializar la lista de resultados en un formato JSON amigable
+            serialized_data = {
                 "total_items": total_items,
                 "total_pages": total_pages,
                 "current_page": page,
                 "items_per_page": items_per_page,
-                "data": data
+                "data": [
+                    {
+                        "status_id": item.status_id,
+                        "document_type_id": item.document_type_id,
+                        "added_date": item.added_date.strftime('%Y-%m-%d') if item.added_date else None,
+                        "support": item.support,
+                        "id": item.id
+                    }
+                    for item in data
+                ]
             }
+
+            serialized_result = json.dumps(serialized_data)
+
+            return serialized_result
         except Exception as e:
             error_message = str(e)
             return f"Error: {error_message}"

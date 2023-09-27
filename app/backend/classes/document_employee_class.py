@@ -1,5 +1,7 @@
 from app.backend.db.models import DocumentEmployeeModel, DocumentEmployeeSignatureModel, EmployeeLaborDatumModel, BranchOfficeModel, SupervisorModel, EmployeeModel, DocumentTypeModel
 from datetime import datetime
+from sqlalchemy import desc
+import json
 
 class DocumentEmployeeClass:
     def __init__(self, db):
@@ -17,16 +19,24 @@ class DocumentEmployeeClass:
         
     def supervisor_get_all(self, rut=None, page=1, items_per_page=10):
         try:
-            data_query = self.db.query(DocumentTypeModel.document_type, DocumentEmployeeModel.status_id, DocumentEmployeeModel.rut, DocumentEmployeeModel.id, DocumentEmployeeModel.added_date,
-                                    EmployeeModel.names, EmployeeModel.father_lastname, EmployeeModel.mother_lastname). \
-                                    outerjoin(EmployeeLaborDatumModel, EmployeeLaborDatumModel.rut == DocumentEmployeeModel.rut). \
-                                    outerjoin(EmployeeModel, EmployeeModel.rut == EmployeeLaborDatumModel.rut). \
-                                    outerjoin(SupervisorModel, SupervisorModel.branch_office_id == EmployeeLaborDatumModel.branch_office_id). \
-                                    outerjoin(DocumentTypeModel, DocumentTypeModel.id == DocumentEmployeeModel.document_type_id). \
-                                    filter(SupervisorModel.rut == '10923452'). \
-                                    filter(DocumentEmployeeModel.status_id == 1). \
-                                    filter(DocumentTypeModel.document_group_id == 2). \
-                                    order_by(DocumentEmployeeModel.id.desc())
+            data_query = self.db.query(
+                DocumentTypeModel.document_type,
+                DocumentEmployeeModel.status_id,
+                DocumentEmployeeModel.rut,
+                DocumentEmployeeModel.id,
+                DocumentEmployeeModel.added_date,
+                EmployeeModel.names,
+                EmployeeModel.father_lastname,
+                EmployeeModel.mother_lastname
+            ) \
+                .outerjoin(EmployeeLaborDatumModel, EmployeeLaborDatumModel.rut == DocumentEmployeeModel.rut) \
+                .outerjoin(EmployeeModel, EmployeeModel.rut == EmployeeLaborDatumModel.rut) \
+                .outerjoin(SupervisorModel, SupervisorModel.branch_office_id == EmployeeLaborDatumModel.branch_office_id) \
+                .outerjoin(DocumentTypeModel, DocumentTypeModel.id == DocumentEmployeeModel.document_type_id) \
+                .filter(SupervisorModel.rut == '10923452') \
+                .filter(DocumentEmployeeModel.status_id == 1) \
+                .filter(DocumentTypeModel.document_group_id == 2) \
+                .order_by(DocumentEmployeeModel.id.desc())
 
             total_items = data_query.count()
             total_pages = (total_items + items_per_page - 1) // items_per_page
@@ -38,14 +48,31 @@ class DocumentEmployeeClass:
 
             if not data:
                 return "No data found"
-                            
-            return {
-                    "total_items": total_items,
-                    "total_pages": total_pages,
-                    "current_page": page,
-                    "items_per_page": items_per_page,
-                    "data": data
+
+            # Serializar la lista de resultados en un formato JSON amigable
+            serialized_data = {
+                "total_items": total_items,
+                "total_pages": total_pages,
+                "current_page": page,
+                "items_per_page": items_per_page,
+                "data": [
+                    {
+                        "document_type": item.document_type,
+                        "status_id": item.status_id,
+                        "rut": item.rut,
+                        "id": item.id,
+                        "added_date": item.added_date.strftime('%Y-%m-%d') if item.added_date else None,
+                        "names": item.names,
+                        "father_lastname": item.father_lastname,
+                        "mother_lastname": item.mother_lastname
+                    }
+                    for item in data
+                ]
             }
+
+            serialized_result = json.dumps(serialized_data)
+
+            return serialized_result
         except Exception as e:
             error_message = str(e)
             return f"Error: {error_message}"
