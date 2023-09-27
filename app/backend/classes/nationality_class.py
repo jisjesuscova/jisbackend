@@ -1,4 +1,5 @@
 from app.backend.db.models import NationalityModel
+import json
 
 class NationalityClass:
     def __init__(self, db):
@@ -17,11 +18,23 @@ class NationalityClass:
     def get(self, field, value):
         try:
             data = self.db.query(NationalityModel).filter(getattr(NationalityModel, field) == value).first()
-            return data
+
+            if data:
+                # Serializar el objeto NationalityModel a un diccionario
+                nationality_data = data.as_dict()
+
+                # Convierte el diccionario a una cadena JSON
+                serialized_data = json.dumps(nationality_data)
+
+                return serialized_data
+
+            else:
+                return "No se encontraron datos para el campo especificado."
+
         except Exception as e:
             error_message = str(e)
             return f"Error: {error_message}"
-    
+        
     def store(self, nationality_inputs):
         try:
             data = NationalityModel(**nationality_inputs)

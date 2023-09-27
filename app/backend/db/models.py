@@ -65,6 +65,15 @@ class NationalityModel(Base):
     added_date = Column(DateTime())
     updated_date = Column(DateTime())
 
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "nationality": self.nationality,
+            "previred_code": self.previred_code,
+            "added_date": self.added_date.strftime('%Y-%m-%d %H:%M:%S') if self.added_date else None,
+            "updated_date": self.updated_date.strftime('%Y-%m-%d %H:%M:%S') if self.updated_date else None,
+        }
+
 class PentionModel(Base):
     __tablename__ = 'pentions'
 
@@ -85,6 +94,15 @@ class BankModel(Base):
     bank = Column(String(255))
     added_date = Column(DateTime())
     updated_date = Column(DateTime())
+
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "visibility_id": self.visibility_id,
+            "bank": self.bank,
+            "added_date": self.added_date.strftime('%Y-%m-%d %H:%M:%S') if self.added_date else None,
+            "updated_date": self.updated_date.strftime('%Y-%m-%d %H:%M:%S') if self.updated_date else None,
+        }
 
 class AccountTypeModel(Base):
     __tablename__ = 'account_types'

@@ -1,4 +1,5 @@
 from app.backend.db.models import BankModel
+import json
 
 class BankClass:
     def __init__(self, db):
@@ -17,7 +18,19 @@ class BankClass:
     def get(self, field, value):
         try:
             data = self.db.query(BankModel).filter(getattr(BankModel, field) == value).first()
-            return data
+
+            if data:
+                # Serializar el objeto BankModel a un diccionario
+                bank_data = data.as_dict()
+
+                # Convierte el diccionario a una cadena JSON
+                serialized_data = json.dumps(bank_data)
+
+                return serialized_data
+
+            else:
+                return "No se encontraron datos para el campo especificado."
+
         except Exception as e:
             error_message = str(e)
             return f"Error: {error_message}"

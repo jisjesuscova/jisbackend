@@ -157,22 +157,47 @@ class EmployeeClass:
                 filter(getattr(EmployeeModel, field) == value). \
                 first()
 
-            signature = DropboxClass(self.db).get('/signatures/', str(data[0].signature))
+            if data:
+                # Serializar los datos del empleado
+                employee_data = {
+                    "id": data[0].id,
+                    "rut": data[0].rut,
+                    "visual_rut": data[0].visual_rut,
+                    "names": data[0].names,
+                    "father_lastname": data[0].father_lastname,
+                    "mother_lastname": data[0].mother_lastname,
+                    "gender_id": data[0].gender_id,
+                    "nationality_id": data[0].nationality_id,
+                    "signature_type_id": data[0].signature_type_id,
+                    "personal_email": data[0].personal_email,
+                    "cellphone": data[0].cellphone,
+                    "born_date": data[0].born_date.strftime('%Y-%m-%d') if data[0].born_date else None,
+                    "picture": data[0].picture,
+                    "signature": data[0].signature,
+                    "privilege": data[1],
+                    "added_date": data[0].added_date.strftime('%Y-%m-%d %H:%M:%S') if data[0].added_date else None,
+                    "updated_date": data[0].updated_date.strftime('%Y-%m-%d %H:%M:%S') if data[0].updated_date else None
+                }
 
-            if data[0].picture == '' or data[0].picture == None:
-                picture = ''
+                # Serializar la firma (signature) y la imagen (picture)
+                signature = DropboxClass(self.db).get('/signatures/', str(data[0].signature)) if data[0].signature else None
+                picture = DropboxClass(self.db).get('/pictures/', str(data[0].picture)) if data[0].picture else None
+
+                # Crear el resultado final como un diccionario
+                result = {
+                    "employee_data": employee_data,
+                    "signature": signature,
+                    "picture": picture,
+                }
+
+                # Convierte el resultado a una cadena JSON
+                serialized_result = json.dumps(result)
+
+                return serialized_result
+
             else:
-                picture = DropboxClass(self.db).get('/pictures/', str(data[0].picture))
+                return "No se encontraron datos para el campo especificado."
 
-            result = {
-                "employee_data": {
-                    "data": data
-                },
-                "signature": signature,
-                "picture": picture,
-            }
-
-            return result
         except Exception as e:
             error_message = str(e)
             return f"Error: {error_message}"
