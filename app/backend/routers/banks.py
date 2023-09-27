@@ -10,7 +10,7 @@ banks = APIRouter(
     tags=["Bank"]
 )
 
-@banks.get("/")
+@banks.post("/")
 def index(db: Session = Depends(get_db)):
 
     return {"message": 1}
