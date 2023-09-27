@@ -117,5 +117,3 @@ app.include_router(regimes)
 app.include_router(salary_settlements)
 app.include_router(document_managements)
 
-if __name__ == "__main__":
-    uvicorn.run("main:app", port=8000, reload=True)
