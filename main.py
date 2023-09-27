@@ -57,7 +57,10 @@ os.environ['SECRET_KEY'] = '7de4c36b48fce8dcb3a4bb527ba62d789ebf3d3a7582472ee49d
 os.environ['ALGORITHM'] = 'HS256'
 
 # Configura las opciones de CORS
-origins = ["*"]
+origins = [
+    "*",
+    "http://localhost:5173",  # Replace with your frontend's URL
+]
 
 # Agrega el middleware de CORS a la aplicación
 app.add_middleware(
