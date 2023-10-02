@@ -10,6 +10,6 @@ banks = APIRouter(
 )
 
 @banks.post("/")
-def index(employee: EmployeeList, session_user: UserLogin = Depends(get_current_active_user), db: Session = Depends(get_db)):
+def index():
 
     return {"message": 1}
